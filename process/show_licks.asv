@@ -1,0 +1,29 @@
+fs = 2e3;
+
+licks = S.licks;
+
+bin_sz_sec = 1;
+bin_sz = fs * bin_sz_sec;
+sz = size(licks,1);
+bin_rem = mod(sz,bin_sz);
+lck = licks(1:end-bin_rem);
+lck = reshape(lck,bin_sz,[]);
+lck = sum(lck,1)./bin_sz_sec;
+
+t = bin_sz_sec:bin_sz_sec:length(lck)*bin_sz_sec;
+
+figure, hold on
+plot(t,lck,'r');
+
+xlabel('Seconds')
+
+%
+
+bin_sz_sec = 30;
+bin_sz = fs * bin_sz_sec;
+sz = size(hit_vec,1);
+bin_rem = mod(sz,bin_sz);
+hits = hit_vec(1:end-bin_rem);
+hits = reshape(hits,bin_sz,[]);
+misses = misses_vec(1:end-bin_rem);
+misses = reshape(misses,bin_sz,[]);
