@@ -1,4 +1,4 @@
-function [] = oh_behave_opto()
+function [] = oh_behave()
 
 %% parameters
 
@@ -6,7 +6,7 @@ config = struct();
 
 % Teensy coms parameters
 config.teensy_fs = 2e3; % teensy sample rate, Hz, this shouldnt effect the experiment or data, just for adjusting plots
-config.serial_port = '/dev/cu.usbmodem164062601';
+config.serial_port = 'COM3';
 config.up_every = 5000; % number of bytes to read in at a time
 config.n_sec_disp = 10; % number of seconds to display on the graph
 
@@ -20,7 +20,7 @@ config.iti_len = [3 7];
 config.prcnt_go_p_alone = 0.75; % percentage of trials that are go trials
 config.prcnt_go_p_opto = 0.75; % percentage of trials that are go trials
 config.prcnt_opto = 0.5; % percent of trials that are go, and resulting percentage of trials that are catch trials
-config.n_start_gomax = 4; % number of trials to put at the begining of max stim go trials to get the animal going
+config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
 config.limit_repeats = true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
 config.n_repeats = 3; % limit consecutive trials to less than this number
 config.n_resets = Inf; % how many times to reset iti on early lick before either issuing feedback or just going forward with trial
@@ -32,9 +32,9 @@ config.tp.lickMax = 1; % uint
 config.tp.waitForNextFrame = 0; % bool, 1/0
 config.tp.contingentStim = 0; % uint 0-3, or number of dac channels, zero index based
 config.tp.trigLen = 200; % uint, length of trigger broadcast/digital high
-config.tp.respLen = 700; % uint, length of response window from stim onset
+config.tp.respLen = 1500; % uint, length of response window from stim onset
 config.tp.valveLen = 100;  % uint, how long the valve opens on reward
-config.tp.consumeLen = 500; % uint, how much time to give between reward administration and starting the next trial
+config.tp.consumeLen = 1500; % uint, how much time to give between reward administration and starting the next trial
 config.tp.pairDelay =  700; % uint, if doing pairing, offset between stim and reward
 config.tp.outLen =   1000; % uint, length of time to braodcast an outcome of an early response
 config.tp.removeLen =  2000; % uint, how long to open the valve for the vacuum to suck away reward
@@ -158,11 +158,11 @@ axc = gl.Children(3);
 id_field = gl.Children(6);
 pth_field = gl.Children(7);
 notes = gl.Children(4);
-hit_txt = gl.Children(20);
-miss_txt = gl.Children(22);
-cw_txt = gl.Children(24);
-fa_txt = gl.Children(26);
-el_txt = gl.Children(28);
+hit_txt = gl.Children(24);
+miss_txt = gl.Children(26);
+cw_txt = gl.Children(28);
+fa_txt = gl.Children(30);
+el_txt = gl.Children(32);
 
 %% Main
 trial_is_done = false;

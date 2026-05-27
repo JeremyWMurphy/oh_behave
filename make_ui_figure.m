@@ -52,12 +52,12 @@ plot(ax,nan_vec,'Color',ax1_color_pallette{2},'LineWidth',1); % piezo signal
 plot(ax,nan_vec,'LineStyle','None','Marker','o','MarkerFaceColor',ax1_color_pallette{6},'MarkerEdgeColor','None','MarkerSize',3); % lick detector
 
 %% notes text box
-
 notes = uitextarea(gl,'Value','Notes Here ...');
 notes.Layout.Column = [1 4];
-notes.Layout.Row = [3 9];
+notes.Layout.Row = [4 7];
 notes.BackgroundColor = [0 0 0];
 notes.FontColor = [0 1 0];
+
 %% set id name and save path
 
 % id label
@@ -134,8 +134,8 @@ strt_btn = uibutton(gl,...
     'Text', 'Begin',...
     'FontColor',[1 1 1],...
      "ButtonPushedFcn", @(src,event) flowControl(fig,1));
-strt_btn.Layout.Row = 10;
-strt_btn.Layout.Column = 1;
+strt_btn.Layout.Row = 3;
+strt_btn.Layout.Column = [1 2];
 
 % stop button
 stp_btn = uibutton(gl,...
@@ -143,28 +143,29 @@ stp_btn = uibutton(gl,...
     'Text', 'End',...
     'FontColor',[1 1 1],...
      "ButtonPushedFcn", @(src,event) flowControl(fig,2));
-stp_btn.Layout.Row = 10;
-stp_btn.Layout.Column = 2;
+stp_btn.Layout.Row = 3;
+stp_btn.Layout.Column = [3 4];
 
 % quit button
 quit_btn = uibutton(gl,...
     'BackgroundColor',[0 0 0],...
     'Text', 'Quit',...
     'FontColor',[1 1 1],...
+    'FontSize',18,...
     "ButtonPushedFcn", @(src,event) flowControl(fig,3));
-quit_btn.Layout.Row = 10;
-quit_btn.Layout.Column = 3;
+quit_btn.Layout.Row = [10];
+quit_btn.Layout.Column = [19 20];
 
 %% reward button, open valve, close valve
 
-valve_txt = uilabel(gl, ...
+rew_txt = uilabel(gl, ...
     'Text','Reward Port:',...    
     'BackgroundColor',[0 0 0],...
     'FontColor',[0.5 0.5 0.5]);
-valve_txt.Layout.Row = 9;
-valve_txt.Layout.Column = [16 20];
-valve_txt.FontSize = 18;
-valve_txt.FontColor = [1 1 1];
+rew_txt.Layout.Row = 8;
+rew_txt.Layout.Column = [1 2];
+rew_txt.FontSize = 18;
+rew_txt.FontColor = [1 1 1];
 
 rew_btn = uibutton(gl,...
     'BackgroundColor',[0 0 0],...
@@ -172,8 +173,17 @@ rew_btn = uibutton(gl,...
     'FontColor',[1 1 1],...
     "ButtonPushedFcn", @(src,event) rewButtonPushed(s) ...    
 );
-rew_btn.Layout.Row = 10;
-rew_btn.Layout.Column = [16 17];
+rew_btn.Layout.Row = 8;
+rew_btn.Layout.Column = [3 4];
+
+valve1_txt = uilabel(gl, ...
+    'Text','Valve 1:',...    
+    'BackgroundColor',[0 0 0],...
+    'FontColor',[0.5 0.5 0.5]);
+valve1_txt.Layout.Row = 9;
+valve1_txt.Layout.Column = [1 2];
+valve1_txt.FontSize = 18;
+valve1_txt.FontColor = [1 1 1];
 
 open_btn = uibutton(gl,...
     'BackgroundColor',[0 0 0],...
@@ -181,8 +191,8 @@ open_btn = uibutton(gl,...
     'FontColor',[1 1 1],...
     "ButtonPushedFcn", @(src,event) vOpenButtonPushed(s) ...    
 );
-open_btn.Layout.Row = 10;
-open_btn.Layout.Column = 18;
+open_btn.Layout.Row = 9;
+open_btn.Layout.Column = 3;
 
 close_btn = uibutton(gl,...
     'BackgroundColor',[0 0 0],...
@@ -190,8 +200,35 @@ close_btn = uibutton(gl,...
     'FontColor',[1 1 1],...
     "ButtonPushedFcn", @(src,event) vCloseButtonPushed(s) ...    
 );
-close_btn.Layout.Row = 10;
-close_btn.Layout.Column = 19;
+close_btn.Layout.Row = 9;
+close_btn.Layout.Column = 4;
+
+valve2_txt = uilabel(gl, ...
+    'Text','Valve 2:',...    
+    'BackgroundColor',[0 0 0],...
+    'FontColor',[0.5 0.5 0.5]);
+valve2_txt.Layout.Row = 10;
+valve2_txt.Layout.Column = [1 2];
+valve2_txt.FontSize = 18;
+valve2_txt.FontColor = [1 1 1];
+
+open2_btn = uibutton(gl,...
+    'BackgroundColor',[0 0 0],...
+    'Text', 'Open',...
+    'FontColor',[1 1 1],...
+    "ButtonPushedFcn", @(src,event) v2OpenButtonPushed(s) ...    
+);
+open2_btn.Layout.Row = 10;
+open2_btn.Layout.Column = 3;
+
+close2_btn = uibutton(gl,...
+    'BackgroundColor',[0 0 0],...
+    'Text', 'Close',...
+    'FontColor',[1 1 1],...
+    "ButtonPushedFcn", @(src,event) v2CloseButtonPushed(s) ...    
+);
+close2_btn.Layout.Row = 10;
+close2_btn.Layout.Column = 4;
 
 %% outcome
 
@@ -234,7 +271,6 @@ div2_txt.Layout.Column = [9];
 div2_txt.FontSize = 32;
 div2_txt.FontColor = [1 1 1];
 div2_txt.HorizontalAlignment = 'Center';
-
 
 cw_txt = uilabel(gl, ...
     'Text','CW',...    
@@ -295,7 +331,6 @@ axb.NextPlot = 'add';
 axb.Color = [0 0 0];
 axb.XColor = [1 1 1];
 axb.YColor = [1 1 1];
-axb.XLabel.String = 'N';
 axb.YLim = [0 5];
 axb.XLim = [0 10];
 axb.Title.Color = [1 1 1];
@@ -306,14 +341,16 @@ axb.Title.String = 'Performance';
 axb.YTick = [1 2 3 4];
 axb.YTickLabel = {'Hits','Misses','CWs','FAs'};
 bh = barh(axb,[1 2 3 4],[0 0 0 0]);
+
 bh.EdgeColor = 'none';
 bh.FaceColor = 'flat';
 bh.CData = ([17, 138, 178; 6, 214, 160; 255, 209, 102; 239, 71, 111]./255);
 axb.Toolbar.Visible = 'off';
 axb.Interactions = [];
+axb.XAxis.Visible  = 'off';
 
 axc = axes(gl);
-axc.Layout.Row = [5 8];
+axc.Layout.Row = [5 9];
 axc.Layout.Column = [15 20];
 axc.NextPlot = 'add';
 axc.Color = [0 0 0];
@@ -347,6 +384,14 @@ end
 
 function vCloseButtonPushed(s)
     write(s,'<S,6>','string');
+end
+
+function v2OpenButtonPushed(s)
+    write(s,'<S,13>','string');
+end
+
+function v2CloseButtonPushed(s)
+    write(s,'<S,14>','string');
 end
 
 function ttButtonPushed(fig,tt,ax)

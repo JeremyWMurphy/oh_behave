@@ -36,7 +36,7 @@ bool reportData = true;
 // ins
 const uint wheelChan = 14;  // analog in
 const uint frameChan = 23;  // frame counter channel, interrupt
-const uint lickChan = 30;   //lick channel
+const uint lickChan = 22;   //lick channel
 volatile uint16_t wheelVal = 0;
 volatile int lickVal = 0;
 // outs
@@ -44,7 +44,7 @@ const uint trigChan1 = 0;               // trigger channel;
 const uint trigChan2 = 1;               // trigger channel;
 const uint trigChan3 = 2;               // trigger channel;
 const uint trigChan4 = 3;               // trigger channel;
-const uint valveChan1 = 36;              // reward valve
+const uint valveChan1 = 4;              // reward valve
 const uint valveChan2 = 6;              // vac line valve for reward removal
 volatile bool valveChan1State = false;  // reward valve
 volatile bool valveChan2State = false;  // vac line valve for reward removal
@@ -64,6 +64,8 @@ const uint REWARD = 8;
 const uint STIMULUS = 9;
 const uint REMOVEREWARD = 11;
 const uint TRIALEND = 12;
+const uint VALVE2O = 13;
+const uint VALVE2C = 14;
 volatile uint State = IDLE;
 
 // Behavior tracking
@@ -150,7 +152,7 @@ volatile uint32_t barcode;
 const uint barcodeInterval = Fs * 5;     // send a barcode every n secs
 const uint barcodeTime = Fs * 0.03;      // time of each ttl bit
 const uint barcodeInitTime = Fs * 0.01;  // sending hi/lo to mark begin and end of barcode
-const uint barcodeCloseTime = Fs * 0.01;    // sending hi/lo to mark begin and end of barcode
+const uint barcodecloseTime = Fs * 0.01;    // sending hi/lo to mark begin and end of barcode
 
 const uint32_t barcodeMax = 4294967295;
 const uint barcodeBits = 32;
@@ -158,6 +160,8 @@ volatile uint barcodeDigit;
 volatile uint bitIdx = 0;
 
 volatile bool initcodeStart = true;
+volatile bool barcodeStart = false;
+volatile bool closecodeStart = false;
 
 volatile bool barcodeOn = false;
 volatile bool initcodeOn = false;
@@ -171,6 +175,7 @@ volatile uint32_t initT = 0;
 volatile uint32_t closeT = 0;
 volatile uint32_t initCount = 0;
 volatile uint32_t closeCount = 0;
+volatile uint32_t closecodeT = 0;
 
 // objs
 Adafruit_MCP4728 mcp;
@@ -284,7 +289,14 @@ void ohBehave() {
 
   } else if (State == TRIALEND) {
     endOfTrialCleanUp();
+
+  } else if (State == VALVE2O) {  // open valve1, this is helpful for clearing lines and stuff
+    open_valve2();
+
+  } else if (State == VALVE2C) {  // close valve1
+    close_valve2();
   }
+  
 }
 
 // State functions
@@ -826,12 +838,12 @@ void genBarcode() {
         digitalWrite(barcodePin, barcodeDigit);
       }
     } else if (closecodeOn){
-      if (loopCount-closeT >= barcodeCloseTime && closeCount < 2){
+      if (loopCount-closeT >= barcodecloseTime && closeCount < 2){
         barcodeDigit = !barcodeDigit;
         digitalWrite(barcodePin, barcodeDigit);
         closeCount++;
         closeT = loopCount;
-      } else if (loopCount-closeT >= barcodeCloseTime && closeCount >= 2){
+      } else if (loopCount-closeT >= barcodecloseTime && closeCount >= 2){
         digitalWrite(barcodePin, LOW);
         closecodeOn = false;
         initcodeStart = true;
