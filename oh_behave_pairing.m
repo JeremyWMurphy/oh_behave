@@ -16,7 +16,7 @@ config.n_trials = 500; % number of total trials to run -- there are many conditi
 
 %% key parameters
 
-config.iti_len = [2 4];
+config.iti_len = [1.5 3.5];
 config.prcnt_go_p_alone = 1; % percentage of trials that are go trials
 config.prcnt_go_p_opto = 1; % percentage of trials that are go trials
 config.prcnt_opto = 0; % percent of trials that are go, and resulting percentage of trials that are catch trials
@@ -27,7 +27,7 @@ config.n_resets = Inf; % how many times to reset iti on early lick before either
 config.just_go_after_reset = false; % just push forward with trial after maxed out early-lick resets
 
 % Teensy parameters, *time should be in ms
-config.tp.enforceEarlyLick = 0; % bool, 1/0
+config.tp.enforceEarlyLick = 1; % bool, 1/0
 config.tp.lickMax = 1; % uint
 config.tp.waitForNextFrame = 0; % bool, 1/0
 config.tp.contingentStim = 0; % uint 0-3, or number of dac channels, zero index based
@@ -37,7 +37,7 @@ config.tp.valveLen = 500;  % uint, how long the valve opens on reward
 config.tp.consumeLen = 500; % uint, how much time to give between reward administration and starting the next trial
 config.tp.pairDelay =  500; % uint, if doing pairing, offset between stim and reward
 config.tp.outLen =   1000; % uint, length of time to braodcast an outcome of an early response
-config.tp.removeLen =  2000; % uint, how long to open the valve for the vacuum to suck away reward
+config.tp.removeLen =  3000; % uint, how long to open the valve for the vacuum to suck away reward
 
 % piezo
 config.sig_amps = 1; % amplitudes of stimuli, Volts
