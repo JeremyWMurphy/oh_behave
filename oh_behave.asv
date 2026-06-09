@@ -1,4 +1,4 @@
-function [] = oh_behave_pairing()
+function [] = oh_behave()
 
 %% parameters
 
@@ -12,36 +12,35 @@ config.n_sec_disp = 10; % number of seconds to display on the graph
 
 % experiment structure parameters
 config.baseln = 5; % length of pause at begining of each run, sec
-config.n_trials = 500; % number of total trials to run -- there are many conditions, so this is a target, but do to rounding (always up, i.e., ceil()), there will be more than this number
+config.n_trials = 100; % number of total trials to run - this is a target, but due to rounding (always up, i.e., ceil()), there may be more than this number
 
-%% key parameters
+%% parameters
 
-config.iti_len = [1.5 3.5];
-config.prcnt_go_p_alone = 1; % percentage of trials that are go trials
-config.prcnt_go_p_opto = 1; % percentage of trials that are go trials
-config.prcnt_opto = 0; % percent of trials that are go, and resulting percentage of trials that are catch trials
-config.n_start_gomax = 5; % number of trials to put at the begining of max stim go trials to get the animal going
-config.limit_repeats = false; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
+config.iti_len = [3 7];
+config.prcnt_go_p_alone = 1; ...0.75; % percentage of piezo alone trials that are go trials
+config.prcnt_go_p_opto = 0.75; % percentage of opto trials that are go trials
+config.prcnt_opto = 0; ...0.5; % percent of trials that are go, and resulting percentage of trials that are catch trials
+config.sig_amps = 1; ...[0.2 0.3 0.4 0.6 1]; % amplitudes of stimuli, Volts
+config.prcnt_amps = 1; ...[0.2 0.2 0.2 0.2 0.2]; ... repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+
+config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
+config.limit_repeats = false; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
 config.n_repeats = 3; % limit consecutive trials to less than this number
 config.n_resets = Inf; % how many times to reset iti on early lick before either issuing feedback or just going forward with trial
 config.just_go_after_reset = false; % just push forward with trial after maxed out early-lick resets
 
 % Teensy parameters, *time should be in ms
 config.tp.enforceEarlyLick = 1; % bool, 1/0
-config.tp.lickMax = 1; % uint
-config.tp.waitForNextFrame = 0; % bool, 1/0
+config.tp.lickMax = 1; % uint, how many licks before calling it an early lick
+config.tp.waitForNextFrame = 0; % bool, 1/0, waits for frame counter to increment to start stimulus
 config.tp.contingentStim = 0; % uint 0-3, or number of dac channels, zero index based
 config.tp.trigLen = 200; % uint, length of trigger broadcast/digital high
 config.tp.respLen = 700; % uint, length of response window from stim onset
 config.tp.valveLen = 500;  % uint, how long the valve opens on reward
-config.tp.consumeLen = 500; % uint, how much time to give between reward administration and starting the next trial
-config.tp.pairDelay =  500; % uint, if doing pairing, offset between stim and reward
+config.tp.consumeLen = 1000; % uint, how much time to give between reward administration and starting the next trial
 config.tp.outLen =   1000; % uint, length of time to braodcast an outcome of an early response
 config.tp.removeLen =  3000; % uint, how long to open the valve for the vacuum to suck away reward
 
-% piezo
-config.sig_amps = 1; % amplitudes of stimuli, Volts
-config.prcnt_amps = 1; ... repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
 % --* initial teensy waveform stimulus parameters, currently fixed to Shin and
 % Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
 % actually 5 ms rise here *--
@@ -58,12 +57,11 @@ config.opto_amp = 5;
 config.opto_pulse_type = '1'; % on teensy 1 = sqaure wave
 config.opto_len = '50'; % ms
 
-% feedback sounds
-config.sound_fs = 44e3;
+% feedback
 config.play_error_sound = false; % play gross noise if early lick
-config.error_timeout_len = 0; ...[3 5]; % on a FA give a timeout this longe, in seconds
 config.play_hit_sound = false; % play chirp on hit
 config.play_fa_sound = true; % play long gross noise if early lick
+config.error_timeout_len = 0; ...[3 5]; % on a FA give a timeout this longe, in seconds
 config.fa_timeout_len = [5 5]; % on a FA give a timeout this longe, in seconds
 % error sound
 config.err_len = min(config.error_timeout_len);
@@ -132,7 +130,6 @@ opto_amp_12bit = map_jm(config.opto_amp,0,5,0,4095);
 teensy_reset =      '<S,1>';
 teensy_go_trial =   '<S,2>';
 teensy_nogo_trial = '<S,3>';
-teensy_pairing_trial = '<S,4>';
 teensy_trigger =    '<S,7>';
 % connect to teensy
 s = serialport(config.serial_port,115200);
@@ -241,9 +238,11 @@ while f.UserData.state ~= 3
 
             if run_type == 1
                 fprintf(data_fid_notes,'\nDetection Task');
+                write_serial(s,'<P,12,0>'); % don't reward all outcomes
                 pause(config.baseln)
             elseif run_type == 2
                 fprintf(data_fid_notes,'\nPairing Task');
+                write_serial(s,'<P,12,1>'); % reward all outcomes
                 pause(config.baseln)
             end
 
@@ -293,16 +292,11 @@ while f.UserData.state ~= 3
                 ax.Title.String = ['Trial ' num2str(trl_cntr) ', ' char(ttype_dict(trial_type))];
 
                 % tell teensy to run appropriate trial type
-                if run_type == 1
-                    if is_go
-                        write_serial(s,teensy_go_trial);
-                    elseif ~is_go
-                        write_serial(s,teensy_nogo_trial);
-                    end
-                elseif run_type == 2
-                    write_serial(s,teensy_pairing_trial);
-                else
-                    error('run type...')
+
+                if is_go
+                    write_serial(s,teensy_go_trial);
+                elseif ~is_go
+                    write_serial(s,teensy_nogo_trial);
                 end
 
                 while ~trial_is_done
