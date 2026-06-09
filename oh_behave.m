@@ -16,15 +16,15 @@ config.n_trials = 100; % number of total trials to run - this is a target, but d
 
 %% parameters
 
-config.iti_len = [3 7];
-config.prcnt_go_p_alone = 1; ...0.75; % percentage of piezo alone trials that are go trials
+config.iti_len = [3 7];...[2 4];
+config.prcnt_go_p_alone = 0.75; ...1; % percentage of piezo alone trials that are go trials
 config.prcnt_go_p_opto = 0.75; % percentage of opto trials that are go trials
-config.prcnt_opto = 0; ...0.5; % percent of trials that are go, and resulting percentage of trials that are catch trials
-config.sig_amps = 1; ...[0.2 0.3 0.4 0.6 1]; % amplitudes of stimuli, Volts
-config.prcnt_amps = 1; ...[0.2 0.2 0.2 0.2 0.2]; ... repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+config.prcnt_opto = 0.5; ...0; % percent of trials that are go, and resulting percentage of trials that are catch trials
+config.sig_amps = [0.2 0.3 0.4 0.6 1]; ...1; % amplitudes of stimuli, Volts
+config.prcnt_amps = [0.2 0.2 0.2 0.2 0.2]; ...1 repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
 
 config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
-config.limit_repeats = false; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
+config.limit_repeats = true; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
 config.n_repeats = 3; % limit consecutive trials to less than this number
 config.n_resets = Inf; % how many times to reset iti on early lick before either issuing feedback or just going forward with trial
 config.just_go_after_reset = false; % just push forward with trial after maxed out early-lick resets
