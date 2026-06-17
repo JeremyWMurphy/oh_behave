@@ -16,12 +16,14 @@ config.n_trials = 100; % number of total trials to run - this is a target, but d
 
 %% parameters
 
-config.iti_len = [3 7];...[2 4];
-config.prcnt_go_p_alone = 0.75; ...1; % percentage of piezo alone trials that are go trials
+config.iti_len = [3 7];
+config.prcnt_go_p_alone = 0.75; ...0.75; % percentage of piezo alone trials that are go trials
 config.prcnt_go_p_opto = 0.75; % percentage of opto trials that are go trials
-config.prcnt_opto = 0.5; ...0; % percent of trials that are go, and resulting percentage of trials that are catch trials
-config.sig_amps = [0.2 0.3 0.4 0.6 1]; ...1; % amplitudes of stimuli, Volts
-config.prcnt_amps = [0.2 0.2 0.2 0.2 0.2]; ...1 repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+config.prcnt_opto = 0.5; % percent of trials that are go, and resulting percentage of trials that are catch trials
+config.sig_amps = [0.2 0.3 0.4 0.6 1]; % amplitudes of stimuli, Volts
+config.prcnt_amps = [0.25 0.25 0.25 0.2 0.05]; repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+
+config.opto_times = [-200 -75 -50 -25]; ...[-200 -75 -50 -25];
 
 config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
 config.limit_repeats = true; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
@@ -58,7 +60,7 @@ config.pulse_intrvl = '0'; % ms
 config.pulse_reps = '1';
 
 % opto
-config.opto_times = [-200 -75 -50 -25];
+
 config.opto_chan = '1';
 config.opto_amp = 5;
 config.opto_pulse_type = '1'; % on teensy 1 = sqaure wave
