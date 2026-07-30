@@ -12,21 +12,40 @@ config.n_sec_disp = 10; % number of seconds to display on the graph
 
 % experiment structure parameters
 config.baseln = 5; % length of pause at begining of each run, sec
-config.n_trials = 100; % number of total trials to run - this is a target, but due to rounding (always up, i.e., ceil()), there may be more than this number
+config.n_trials = 500; % number of total trials to run - this is a target, but due to rounding (always up, i.e., ceil()), there may be more than this number
 
 %% parameters
 
-config.iti_len = [3 7];
-config.prcnt_go_p_alone = 0.75; ...0.75; % percentage of piezo alone trials that are go trials
-config.prcnt_go_p_opto = 0.75; % percentage of opto trials that are go trials
-config.prcnt_opto = 0.5; % percent of trials that are go, and resulting percentage of trials that are catch trials
-config.sig_amps = [0.2 0.3 0.4 0.6 1]; % amplitudes of stimuli, Volts
-config.prcnt_amps = [0.25 0.25 0.25 0.2 0.05]; repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+% % --* initial teensy waveform stimulus parameters, currently fixed to Shin and
+% % Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
+% % actually 5 ms rise here *--
+%config.piezo_chan = '0';
+%config.pulse_type = '1'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid
+%config.pulse_len = '1'; % ms
+%config.pulse_intrvl = '0'; % ms
+%config.pulse_reps = '1';
 
-config.opto_times = [-200 -75 -50 -25]; ...[-200 -75 -50 -25];
+% % --* initial teensy waveform stimulus parameters, currently fixed to Shin and
+% % Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
+% % actually 5 ms rise here *--
+config.piezo_chan = '0';
+config.pulse_type = '1'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid
+config.pulse_len = '25'; % ms
+config.pulse_intrvl = '0'; % ms
+config.pulse_reps = '1';
+
+config.iti_len = [5 7];
+config.prcnt_go_p_alone = 1; ... 0.9; % percentage of piezo alone trials that are go trials
+config.prcnt_go_p_opto = 0; % percentage of opto trials that are go trials
+%config.prcnt_opto = 0.2; % percent of trials that include the opto stimulus
+config.prcnt_opto = 0; % percent of trials that include the opto stimulus
+config.sig_amps = 2; ...[0.2 0.3 0.4 0.6 1 2]; % amplitudes of stimuli, Volts
+config.prcnt_amps = 1; ...[0.16 0.16 0.16 0.16 0.16 0.20]; repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
+
+config.opto_times = [-200 -75 -50 -25];
 
 config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
-config.limit_repeats = true; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
+config.limit_repeats = false; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
 config.n_repeats = 3; % limit consecutive trials to less than this number
 config.n_resets = Inf; % how many times to reset iti on early lick before either issuing feedback or just going forward with trial
 config.just_go_after_reset = false; % just push forward with trial after maxed out early-lick resets
@@ -46,23 +65,13 @@ config.tp.removeLen =  3000; % uint, how long to open the valve for the vacuum t
 % feedback
 config.play_error_sound = false; % play gross noise if early lick
 config.play_hit_sound = false; % play chirp on hit
-config.play_fa_sound = true; % play long gross noise if early lick
+config.play_fa_sound = false; % play long gross noise if early lick
 config.error_timeout_len = 0; ...[3 5]; % on a earlylick give a timeout this long, in seconds
-config.fa_timeout_len = [5 7]; % on a FA give a timeout this long, in seconds
-
-% --* initial teensy waveform stimulus parameters, currently fixed to Shin and
-% Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
-% actually 5 ms rise here *--
-config.piezo_chan = '0';
-config.pulse_type = '0'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid
-config.pulse_len = '25'; % ms
-config.pulse_intrvl = '0'; % ms
-config.pulse_reps = '1';
+config.fa_timeout_len = 0; ...[10 15]; % on a FA give a timeout this long, in seconds
 
 % opto
-
 config.opto_chan = '1';
-config.opto_amp = 5;
+config.opto_amp = 2.38;
 config.opto_pulse_type = '1'; % on teensy 1 = sqaure wave
 config.opto_len = '50'; % ms
 

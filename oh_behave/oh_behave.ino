@@ -356,7 +356,7 @@ void goNoGo() {
         }
       }
 
-      if (latestOutcome == HIT || rewardAll) {
+      if (latestOutcome == HIT || (rewardAll && State == GO)) {
         State = REWARD;
       } else {
         State = TRIALEND;
@@ -712,7 +712,7 @@ void parseData() {  // split the data into its parts
         transmitLen = (volatile uint)round((param_val / 1000.0) * Fs);
       } else if (param_id == 11) {  // how long to open remove reward valve for
         removeLen = (volatile uint)round((param_val / 1000.0) * Fs);
-      } else if (param_id == 12) {  // how long to open remove reward valve for      
+      } else if (param_id == 12) {  // reward all out comes (for pairing)      
          if (param_val == 1) {
           rewardAll = true;
         } else {
