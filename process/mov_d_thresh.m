@@ -1,6 +1,6 @@
-function [bad_trials] = mov_d_thresh(fas,cws,hits,misses)
+function [bad_trials] = mov_d_thresh(fas,cws,hits,misses,d_thresh)
 
-d_thresh = 0;
+% d_thresh = 0;
 
 fas(fas==1) = 4;
 cws(cws==1) = 3;

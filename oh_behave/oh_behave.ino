@@ -113,14 +113,16 @@ volatile uint waveAmp[4] = { 0, 0, 0, 0 };    // max voltage amplitude, in 12bit
 volatile uint waveIPI[4] = { 20, 0, 0, 0 };   // duration between pulses, set via serial in ms, converted to sample points
 volatile uint waveReps[4] = { 5, 0, 0, 0 };   // number of times to repeat wave pulse and interpulse interval
 volatile uint rampStep[4] = { 0, 0, 0, 0 };   // specific to ramping variables, still in development
-volatile uint whaleStep[4] = { 0, 0, 0, 0 };  // specific to ramping variables, still in development
+volatile uint whaleStep[4] = { 0, 0, 0, 0 };  // specific to asymcosin variables, still in development
+volatile uint gaussStep[4] = { 0, 0, 0, 0 };  // specific to gauss variables, still in development
 volatile uint waveBase[4] = { 0, 0, 0, 0 };   // baseline prior to stimulus onset, in ms, allows for offsets between the stimuli, set via serial in ms, converted to sample points
 // waveform tracking
 volatile uint wavIncrmntr[4] = { 0, 0, 0, 0 };  // for keeping track of where we are in a given stimulus presentation
 volatile uint repCntr[4] = { 0, 0, 0, 0 };      // for keeping track of pulse repitions
 volatile uint ipiCntr[4] = { 0, 0, 0, 0 };      // for keeping track of where we are in an interpulse interval
 volatile uint BaseCntr[4] = { 0, 0, 0, 0 };     // for keeping track of where we are in a baseline period
-volatile uint whaleCntr[4] = { 0, 0, 0, 0 };    //
+volatile uint whaleCntr[4] = { 0, 0, 0, 0 };    // tracking whale stim
+volatile uint gaussCntr[4] = { 0, 0, 0, 0 };    // tracking gauss stim
 volatile uint waveParams[7] = { 0, 0, 0, 0, 0, 0, 0 };
 volatile bool inIpi[4] = { false, false, false, false };
 volatile bool inBase[4] = { true, true, true, true };
@@ -529,6 +531,11 @@ void waveWrite() {
             } else {
               curVal[i] = linspace((float)waveDur[i] / 2, (float)waveAmp[i], 0, wavIncrmntr[i] - waveDur[i] / 2);
             }
+          } else if (waveType[i] == 5) {  // gauss
+            if (wavIncrmntr[i] % gaussStep[i] == 0) {
+              curVal[i] = map(gauss[gaussCntr[i]], 0, waveMax, 0, waveAmp[i]);
+              gaussCntr[i]++;
+            }
           }
           wavIncrmntr[i] = wavIncrmntr[i] + 1;
         }
@@ -657,10 +664,10 @@ void parseData() {  // split the data into its parts
       waveType[chanSelect] = waveParams[1];
       // set duration in sample points
       waveDur[chanSelect] = (volatile uint)round((waveParams[2] / 1000.0) * Fs);
-      if ((waveType[chanSelect] == 0) && (waveDur[chanSelect] < SamplesNum)) {
-        Serial.println("The requested duration is too short for the whalestim, setting to minimum of 25 ms");
+      if ((waveType[chanSelect] == 0 || waveType[chanSelect] == 5) && waveDur[chanSelect] < SamplesNum) {
+        Serial.println("The requested duration is too short for the stim type, setting to minimum of 25 ms");
         waveDur[chanSelect] = SamplesNum;
-      } else if ((waveType[chanSelect] == 0) && (waveDur[chanSelect] % SamplesNum != 0)) {
+      } else if ((waveType[chanSelect] == 0 || waveType[chanSelect] == 5) && waveDur[chanSelect] % SamplesNum != 0) {
         Serial.println("The requested duration for the whalestim must be divisible by 25, shifting duration up to next multiple of 25.");
         waveDur[chanSelect] = waveDur[chanSelect] + (waveDur[chanSelect] % SamplesNum);
       }
@@ -676,6 +683,8 @@ void parseData() {  // split the data into its parts
       rampStep[chanSelect] = (volatile uint)ceil((float)waveAmp[chanSelect] / waveDur[chanSelect]);
       // this is always computed, but only used if using whale stim
       whaleStep[chanSelect] = (volatile uint)ceil((float)waveDur[chanSelect] / SamplesNum);  // how quickly to step through the asymCosine
+      // this is always computed, but only used if using gauss stim
+      gaussStep[chanSelect] = (volatile uint)ceil((float)waveDur[chanSelect] / SamplesNum);  // how quickly to step through the gauss
     } else if (msgCode == 'S') {                                                             // setting State
       ptr = strtok(NULL, ",");
       State = atoi(ptr);

@@ -1,26 +1,33 @@
-function [] = get_teensy_behavior_compile(pth,compile_days,runs,id)
+function [] = get_teensy_behavior_compile(pth,compile_days,runs,id,fname)
 
 fs = 2e3;
-rt_cutoff = 250;
+rt_cutoff = 100;
 
-d_cuttoff = 0;
-d_prime_bin_sec = 120;
+opto_fa_thresh = Inf;
+
+d_thresh = 0;
 
 % beh will be [piezo_amp opto_trl opto_t outcome rt trial_ix i];
 % hit = 1, miss = 0, cw = 2, fa = 3
 beh = [];
+beh_day = {};
 go_licks = [];
 nogo_opto_licks = [];
-running_dprime_days = {};
-running_dprime_cont = [];
 for i = 1:numel(compile_days)
 
-    fprintf(['\nDoing ' pth 'behavior_' runs{compile_days(i)} '.mat'])
-    load([pth 'behavior_' runs{compile_days(i)} '.mat'],'S');
+    fprintf(['\nDoing ' pth 'behavior_' char(runs(compile_days(i))) '.mat'])
+    load([pth 'behavior_' char(runs(compile_days(i))) '.mat'],'S');
     b = S.beh;
-    first_hit = find(b(:,4)==1,1,'first');
-    last_hit = find(b(:,4)==1,1,'last');
-    b = b(first_hit:last_hit,:);
+
+    opto_trls = b(b(:,2)==1,:);
+    
+    opto_fa_ixs = opto_trls(opto_trls(:,4)==3,6);
+    opto_cw_ixs = opto_trls(opto_trls(:,4)==2,6);
+    p_opto_fa = numel(opto_fa_ixs)./(numel(opto_fa_ixs) + numel(opto_cw_ixs));
+    
+    if p_opto_fa > opto_fa_thresh
+         continue
+    end
 
     hit_vec = zeros(b(end,7),1);
     hit_ixs = b(b(:,4)==1,6);
@@ -38,80 +45,30 @@ for i = 1:numel(compile_days)
     fa_ixs = b(b(:,4)==3,6);
     fa_vec(fa_ixs) = 1;
 
-    bin_sz = fs * d_prime_bin_sec;
-    sz = size(hit_vec,1);
-    bin_rem = mod(sz,bin_sz);
-
-    hit = hit_vec(1:end-bin_rem);
-    hit = reshape(hit,bin_sz,[]);
-
-    miss = miss_vec(1:end-bin_rem);
-    miss = reshape(miss,bin_sz,[]);
-
-    fa = fa_vec(1:end-bin_rem);
-    fa = reshape(fa,bin_sz,[]);
-
-    cw = cw_vec(1:end-bin_rem);
-    cw = reshape(cw,bin_sz,[]);
-
-    bin_hits = sum(hit,1);
-    bin_miss = sum(miss,1);
-    bin_cw = sum(cw,1);
-    bin_fa = sum(fa,1);
-
-    bin_hits(bin_hits==0) = 0.5;
-    bin_miss(bin_miss==0) = 0.5;
-    bin_cw(bin_cw==0) = 0.5;
-    bin_fa(bin_fa==0) = 0.5;
-
-    pHit = bin_hits./(bin_hits+bin_miss); % pHit = P(YES|SIGNAL)
-    pFA  = bin_fa./(bin_fa+bin_cw); % pFA = P(YES|NOISE)
-    %-- Convert to Z scores, no error checking
-
-    zHit = norminv(pHit);
-    zFA  = norminv(pFA);
-
-    %-- Calculate d-prime
-    d = zHit - zFA;
-    running_dprime_days{i} = d;
-    running_dprime_cont = cat(2,running_dprime_cont,d);
-
-    bad_dbins = d<d_cuttoff;
-    t = 0:d_prime_bin_sec:(size(d,2)-1)*d_prime_bin_sec;
-    bad_ts = t(bad_dbins);
-    trial_ts = b(:,6)./fs;
-    low_d_trials = zeros(size(b,1),1);
-    for j = 1:numel(t)
-        if any(t(j)==bad_ts)
-            if j ~= numel(t)
-                low_d_trials(trial_ts>=t(j)&trial_ts<t(j+1)) = 1;
-            elseif j == numel(t)
-                low_d_trials(trial_ts>=t(j)) = 1;
-            end
-        end
-    end
-
-    %b(logical(low_d_trials),:) = [];
-
-    [bad_trials] = bad_trials_response_rate(fa_vec,cw_vec,hit_vec,miss_vec);
-    %[bad_trials] = mov_d_thresh(fa_vec,cw_vec,hit_vec,miss_vec);
+    %[bad_trials_r] = bad_trials_response_rate(fa_vec,cw_vec,hit_vec,miss_vec);
+    [bad_trials_d] = mov_d_thresh(fa_vec,cw_vec,hit_vec,miss_vec,d_thresh);
+    
+    bad_trials = [bad_trials_d]; ....; bad_trials_d];
     b(bad_trials,:) = [];
 
     beh = cat(1,beh,b);
+    % beh will be [piezo_amp opto_trl opto_t outcome rt trial_ix i];
+    % hit = 1, miss = 0, cw = 2, fa = 3
+    b = array2table(b,VariableNames={'piezo_amp','opto_trial','opto_time','outcome','rt','trial_ix_strt','trial_ix_end','idx'});
+    beh_day{i} = b;
 
-    go_licks = cat(2,go_licks,S.all_go_licks);
     nogo_opto_licks = cat(2,nogo_opto_licks,S.all_opto_nogo_licks);
 
 end
 
 % remove hits where the rt was faster than the cutoff
-beh(beh(beh(:,4)==1,5)<rt_cutoff,:) = [];
+beh(beh(beh(:,4)==1,5)<=rt_cutoff,:) = [];
 
 %% n_conditions = p amps x opo tf x opto time
 
 % cell 1 will be no opto
 beh_summ{1} = zeros(numel(unique(beh(:,1))),3);
-% remianing cells will be for each opto time
+% remaining cells will be for each opto time
 opto_ts = unique(beh(~isnan(beh(:,3)),3));
 for i = 1:numel(opto_ts)
     beh_summ{i+1} = zeros(numel(unique(beh(:,1))),3);
@@ -184,8 +141,6 @@ for i = 1:numel(cnts)
             pFA = 0.001;
         end
      
-
-
         zHit = norminv(pHit);
         zFA  = norminv(pFA);
         d = zHit - zFA;
@@ -194,7 +149,7 @@ for i = 1:numel(cnts)
     end
 end
 
-save([pth 'all_behavior'],'D','beh_summ','cnts','p_amps','opto_ts','go_licks')
+save([pth 'all_behavior'],'D','beh_summ','cnts','p_amps','opto_ts','go_licks','beh','beh_day')
 
 
 

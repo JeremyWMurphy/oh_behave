@@ -21,7 +21,6 @@ new_state(new_state~=2&new_state~=3&new_state~=12) = 0;
 trl_ends = find(diff(new_state)==-12)+1;
 trl_starts = find(diff(new_state)==2|diff(new_state)==3)-1;
 
-
 cntr = 0;
 trial_ixs = [];
 
@@ -56,6 +55,8 @@ beh = [];
 % beh will be [piezo_amp outcome rt trial_ixs ix];
 % for each trial, get outcome
 all_go_licks = [];
+dat_no_el = {};
+cntr = 1;
 
 for i = 1:numel(trial_dat)
 
@@ -73,6 +74,7 @@ for i = 1:numel(trial_dat)
 
     b = [];
     if ~abrt
+        
         if ttype == 2 % go trial
             pz = dat(:,3);
             pz_amp = round(max(pz),2);
@@ -110,6 +112,9 @@ for i = 1:numel(trial_dat)
             end
         end
         beh = cat(1,beh,b);
+        dat_no_el{cntr} = dat;
+        cntr = cntr + 1;
+
     end
 end
 
@@ -122,6 +127,6 @@ S.outcome = outcome;
 S.state = state;
 S.fs = fs;
 S.all_go_licks = all_go_licks;
-S.trial_dat = trial_dat;
+S.trial_dat = dat_no_el;
 
 

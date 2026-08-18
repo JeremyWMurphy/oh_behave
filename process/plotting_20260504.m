@@ -1,11 +1,14 @@
-%S = load('/Users/jeremy/Documents/data/Cue_S2_Pom/behavior/gpr26_162/all_behavior.mat');
-S = load('/Users/jeremy/Documents/data/Cue_S2_Pom/behavior/gpr26_158/all_behavior.mat');
+S = load('/Users/jeremy/Documents/data/Cue_S2_Pom/behavior/gpr26_162/all_behavior.mat');
+%S = load('/Users/jeremy/Documents/data/Cue_S2_Pom/behavior/gpr26_158/all_behavior.mat');
 
+fs = 2e3;
 %%
 ft = fittype('logistic');
 
 include_amps = [0 0.2 0.3 0.4 0.6 0.9 1.0];
 include_opto_ts = [25 50 75 200];
+
+%%
 
 figure, hold on
 
@@ -20,7 +23,7 @@ plot(S.beh_summ{1}(amp_ixs,1),S.beh_summ{1}(amp_ixs,2),'-ow')
 %%
 
 W = {S};
-ids = {'162'};
+ids = {'id'};
 
 include_opto_ts = [25 75 200 50];
 
@@ -50,7 +53,7 @@ for i = 1:numel(W)
         lgd{j+1} = num2str(-1*opto_ts(opto_ixs(j)));
     end
 
-    %
+    
     mdl_fit = {};
 
     ft = fittype('Gompertz');
@@ -79,7 +82,7 @@ end
 
 %%
 W = {S};
-ids = {'162'};
+ids = {'id'};
 
 for i = 1:numel(W)
 
@@ -128,5 +131,41 @@ for i = [1 3 4 5 6]
     trials = [trials; S.cnts{i}.n_cws+S.cnts{i}.n_fas S.cnts{i}.n_hits(2:6)+S.cnts{i}.n_misses(2:6)];
 end
 
+figure,
+bar(trials)
+
 %%
+
+include_opto_ts = [25 75 200 50];
+clrs = colororder;
+
+unstruct(S);
+
+amp_ixs = logical(sum(p_amps==include_amps,2));
+opto_ixs = find(sum(opto_ts==include_opto_ts,2))';
+
+lgd = {};
+lgd{1} = 'No Opto';
+
+figure, hold on
+
+% no opto curve
+plot(beh_summ{1}(amp_ixs,1),beh_summ{1}(amp_ixs,3),'-ow','markerfacecolor','w');
+
+% opto curves
+for j = 1:numel(opto_ixs)
+    plot(beh_summ{1}(amp_ixs,1),beh_summ{opto_ixs(j)+1}(amp_ixs,3),'-o','Color',clrs(j,:),'markerfacecolor',clrs(j,:));
+    lgd{j+1} = num2str(-1*opto_ts(opto_ixs(j)));
+end
+
+xlabel('Piezo Voltage')
+ylabel('RT')
+legend(lgd);
+ax=gca;
+ax.Legend.EdgeColor = 'None';
+ax.Legend.Location = 'SouthEast';
+ylim([0 0.7])
+
+
+
 

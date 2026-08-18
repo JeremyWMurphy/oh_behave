@@ -1,19 +1,17 @@
-function [D] = read_teensy_data(pth,runs)
+function [D] = read_teensy_data(pth,runs,dt)
 
 D = [];
 
-dt = datetime(runs{1}(5:end),'InputFormat','yyyy-MM-dd_''T''HH-mm-ss');
-
 % after 4/29/2026 I added yet another column to the teensy output
-if dt > datetime('2026_04_29_17-33-30','InputFormat','yyyy_MM_dd_HH-mm-ss')
+if  ~strcmp(runs(1:3),'161') && dt(1) > datetime('2026_04_29_17-33-30','InputFormat','yyyy_MM_dd_HH-mm-ss') 
 
-    if nargin > 1
+    if size(runs,1) > 1
 
         last_ix = 0;
 
-        for i = 1:numel(runs)
+        for i = 1:size(runs,1)
 
-            fid = fopen([pth runs{i} '/data_stream.csv']);
+            fid = fopen([pth runs(i,:) '/data_stream.csv']);
             data = fscanf(fid,'<%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d>\n');
             fclose(fid);
 
@@ -30,7 +28,7 @@ if dt > datetime('2026_04_29_17-33-30','InputFormat','yyyy_MM_dd_HH-mm-ss')
 
     else
 
-        fid = fopen([pth '/data_stream.csv']);
+        fid = fopen([pth runs(1,:) '/data_stream.csv']);
         data = fscanf(fid,'<%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d>\n');
         fclose(fid);
 
@@ -51,12 +49,13 @@ if dt > datetime('2026_04_29_17-33-30','InputFormat','yyyy_MM_dd_HH-mm-ss')
 
 else
 
-    if nargin > 1
+    if size(runs,1) > 1
+
         last_ix = 0;
 
-        for i = 1:numel(runs)
+        for i = 1:size(runs,1)
 
-            fid = fopen([pth runs{i} '/data_stream.csv']);
+            fid = fopen([pth runs(i,:) '/data_stream.csv']);
             data = fscanf(fid,'<%d,%d,%d,%d,%d,%d,%d,%d,%d,%d>\n');
             fclose(fid);
 
@@ -73,7 +72,7 @@ else
 
     else
 
-        fid = fopen([pth '/data_stream.csv']);
+        fid = fopen([pth runs(1,:) '/data_stream.csv']);
         data = fscanf(fid,'<%d,%d,%d,%d,%d,%d,%d,%d,%d,%d>\n');
         fclose(fid);
 
