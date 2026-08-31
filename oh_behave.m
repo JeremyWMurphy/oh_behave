@@ -29,22 +29,21 @@ config.n_trials = 500; % number of total trials to run - this is a target, but d
 % % Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
 % % actually 5 ms rise here *--
 config.piezo_chan = '0';
-config.pulse_type = '1'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid
-config.pulse_len = '25'; % ms
+config.pulse_type = '5'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid
+config.pulse_len = '100'; % ms
 config.pulse_intrvl = '0'; % ms
 config.pulse_reps = '1';
 
-config.iti_len = [5 7];
+config.iti_len = [3 3];
 config.prcnt_go_p_alone = 1; ... 0.9; % percentage of piezo alone trials that are go trials
-config.prcnt_go_p_opto = 0; % percentage of opto trials that are go trials
-%config.prcnt_opto = 0.2; % percent of trials that include the opto stimulus
-config.prcnt_opto = 0; % percent of trials that include the opto stimulus
+config.prcnt_go_p_opto = 1; % percentage of opto trials that are go trials
+config.prcnt_opto = 1; % percent of trials that include the opto stimulus
 config.sig_amps = 2; ...[0.2 0.3 0.4 0.6 1 2]; % amplitudes of stimuli, Volts
 config.prcnt_amps = 1; ...[0.16 0.16 0.16 0.16 0.16 0.20]; repmat(1/numel(config.sig_amps),1,numel(config.sig_amps)); % proportion of different amplitudes to present - needs to add to 1
 
 config.opto_times = [-200 -75 -50 -25];
 
-config.n_start_gomax = 3; % number of trials to put at the begining of max stim go trials to get the animal going
+config.n_start_gomax = 0; % number of trials to put at the begining of max stim go trials to get the animal going
 config.limit_repeats = false; ...true; % this finds a trial permutation that limits repeating of the same trial type, the program will hang if you have this set to true and there are few conditions
 config.n_repeats = 3; % limit consecutive trials to less than this number
 config.n_resets = Inf; % how many times to reset iti on early lick before either issuing feedback or just going forward with trial
@@ -56,7 +55,7 @@ config.tp.lickMax = 1; % uint, how many licks before calling it an early lick
 config.tp.waitForNextFrame = 0; % bool, 1/0, waits for frame counter to increment to start stimulus
 config.tp.contingentStim = 0; % uint 0-3, or number of dac channels, zero index based
 config.tp.trigLen = 200; % uint, length of trigger broadcast/digital high
-config.tp.respLen = 700; % uint, length of response window from stim onset
+config.tp.respLen = 3000; % uint, length of response window from stim onset
 config.tp.valveLen = 500;  % uint, how long the valve opens on reward
 config.tp.consumeLen = 1000; % uint, how much time to give between reward administration and starting the next trial
 config.tp.outLen =   1000; % uint, length of time to braodcast an outcome of an early response
@@ -72,7 +71,8 @@ config.fa_timeout_len = 0; ...[10 15]; % on a FA give a timeout this long, in se
 % opto
 config.opto_chan = '1';
 config.opto_amp = 2.38;
-config.opto_pulse_type = '1'; % on teensy 1 = sqaure wave
+%5mw = 2.38 4mw = 2.26, 3 mw = 2.11, 2mw = 1.96, 1mw = 1.75
+config.opto_pulse_type = '5'; % on teensy 1 = sqaure wave, 0 = asymcosine, 5 = gaussian
 config.opto_len = '50'; % ms
 
 % feedback sounds

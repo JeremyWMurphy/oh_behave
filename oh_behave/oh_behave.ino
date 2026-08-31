@@ -431,6 +431,7 @@ void endOfTrialCleanUp() {
       BaseCntr[i] = 0;
       repCntr[i] = 0;
       whaleCntr[i] = 0;
+      gaussCntr[i] = 0;
       wavIncrmntr[i] = 0;
       inIpi[i] = false;
       ipiCntr[i] = 0;
@@ -544,12 +545,14 @@ void waveWrite() {
           if (repCntr[i] < waveReps[i] - 1) {  // but if it's not the end of the number of wave repititions
             repCntr[i] = repCntr[i] + 1;       // increment rep counter
             whaleCntr[i] = 0;
+            gaussCntr[i] = 0;
             wavIncrmntr[i] = 0;  // reset wave indexer
             inIpi[i] = true;     // go into ipi
             curVal[i] = 0;
           } else {  // else that's the end of the requested signal, so reset stuff
             repCntr[i] = 0;
             whaleCntr[i] = 0;
+            gaussCntr[i] = 0;
             wavIncrmntr[i] = 0;
             inIpi[i] = false;  // go into ipi
             stimOn[i] = false;
