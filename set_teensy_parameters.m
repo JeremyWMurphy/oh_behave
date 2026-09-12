@@ -19,7 +19,7 @@
  for i = 1:numel(fns)
      param_code = parameter_codes{cellfun(@(x) strcmp(x(1),fns{i}),parameter_codes,'uniformOutput',true)}{2};
      param_val = tp.(fns{i});
-     fprintf(['\n' param_stem num2str(param_code) ',' num2str(param_val) '>'])
+     %fprintf(['\n' param_stem num2str(param_code) ',' num2str(param_val) '>'])
      write(s,[param_stem num2str(param_code) ',' num2str(param_val) '>'],'string'); % set each parameter on teensy
      pause(0.1);
  end
