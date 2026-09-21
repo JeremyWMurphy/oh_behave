@@ -444,6 +444,7 @@ void justStim() {
 }
 
 void justReward() {
+  
   if (dispStart) {
     dispT = loopCount;
     dispStart = false;
@@ -452,14 +453,16 @@ void justReward() {
     open_valve1();
   } else {
     close_valve1();
-    if (consumeStart) {
-      consumeT = loopCount;
-      consumeStart = false;
-    }
-    if (loopCount - consumeT > consumeLen) {
-      State = vacReward ? REMOVEREWARD : TRIALEND;
-    }
   }
+
+  if (consumeStart) {
+    consumeT = loopCount;
+    consumeStart = false;
+  }
+  if (loopCount - consumeT > consumeLen) {
+    State = vacReward ? REMOVEREWARD : TRIALEND;
+  }
+
 }
 
 void removeReward() {
@@ -626,7 +629,7 @@ void waveWrite() {
           wavIncrmntr[i] = wavIncrmntr[i] + 1;
         }
 
-        if (wavIncrmntr[i] >= waveDur[i]) {    
+        if (wavIncrmntr[i] > waveDur[i]) {    
           if (repCntr[i] < waveReps[i] - 1) {  
             repCntr[i] = repCntr[i] + 1;       
             whaleCntr[i] = 0;
