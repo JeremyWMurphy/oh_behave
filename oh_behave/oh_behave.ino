@@ -212,7 +212,6 @@ IntervalTimer t1;
 // ====================================================================
 void ohBehave();
 void pollData();
-void dataReport();
 void recvSerial();
 void parseData();
 void genBarcode();
@@ -675,31 +674,6 @@ void pollData() {
   lickVal = digitalRead(lickChan);
 }
 
-void dataReport() {
-
-  if (reportData) {
-    // Empty the queue continuously as long as data remains inside it
-    while (!telemetryQueue.isEmpty()) {
-      TelemetryPacket outbound = telemetryQueue.shift(); // Pull the oldest data packet
-
-      Serial.print("<");
-      Serial.print(outbound.loopNum);    Serial.print(",");
-      Serial.print(outbound.frameNum);   Serial.print(",");
-      Serial.print(outbound.stateNum);   Serial.print(",");
-      Serial.print(outbound.outcomeNum); Serial.print(",");
-      Serial.print(outbound.val0);       Serial.print(",");
-      Serial.print(outbound.val1);       Serial.print(",");
-      Serial.print(outbound.lick);       Serial.print(",");
-      Serial.print(outbound.wheel);      Serial.print(",");
-      Serial.print(outbound.v1State);    Serial.print(",");
-      Serial.print(outbound.v2State);    Serial.print(",");
-      Serial.print(outbound.barcode);
-      Serial.println(">");
-    }
-  }
-
-}
-
 // Call this at the very bottom of ohBehave() on every single tick
 void queueTelemetry() {
   TelemetryPacket pack;
@@ -947,7 +921,6 @@ void loop() {
     while (!telemetryQueue.isEmpty()) {
       // Pull the oldest unsent data packet out of the buffer
       TelemetryPacket outbound = telemetryQueue.shift(); 
-
       // Print using the struct data members
       Serial.print("<");
       Serial.print(outbound.loopNum);    Serial.print(",");
