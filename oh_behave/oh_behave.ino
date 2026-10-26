@@ -115,8 +115,8 @@ volatile uint waveAmp[4] = { 0, 0, 0, 0 };    // max voltage amplitude, in 12bit
 volatile uint waveIPI[4] = { 20, 0, 0, 0 };   // duration between pulses, set via serial in ms, converted to sample points
 volatile uint waveReps[4] = { 5, 0, 0, 0 };   // number of times to repeat wave pulse and interpulse interval
 volatile uint rampStep[4] = { 0, 0, 0, 0 };   // specific to ramping variables
-volatile uint whaleStep[4] = { 0, 0, 0, 0 };  // specific to asymcosin variables
-volatile float whalePhase[4] = {0.0, 0.0, 0.0, 0.0};  // specific to gauss variables
+volatile float whaleStep[4] = { 0.0, 0.0, 0.0, 0.0};  // specific to asymcosin variables
+volatile float whalePhase[4] = {0.0, 0.0, 0.0, 0.0};  // specific to whale variables
 volatile float gaussStep[4] = {0.0, 0.0, 0.0, 0.0};  // specific to gauss variables
 volatile float gaussPhase[4] = {0.0, 0.0, 0.0, 0.0};  // specific to gauss variables
 volatile uint waveBase[4] = { 0, 0, 0, 0 };   // baseline prior to stimulus onset, in ms, allows for offsets between the stimuli, set via serial in ms, converted to sample points
@@ -575,22 +575,16 @@ void waveWrite() {
         } else {  
           stimBegin[i] = true;     
           if (waveType[i] == 0) {  // Whale stim
-
           //------------------------------------------------------------------------
             int indexA = (int)whalePhase[i];
             int indexB = indexA + 1;
-
             if (indexB >= SamplesNum) {
               indexB = 0; 
             }
-
             float fraction = whalePhase[i] - indexA;                            
-            float fineInterp = (float)asymCos[indexA] + fraction * ((float)asymCos[indexB] - (float)asymCos[indexA]); // linear interpolation
-            
+            float fineInterp = (float)asymCos[indexA] + fraction * ((float)asymCos[indexB] - (float)asymCos[indexA]); // linear interpolation           
             curVal[i] = (int)round((fineInterp / 4095.0) * (float)waveAmp[i]);
-
             whalePhase[i] += whaleStep[i];
-
             if (whalePhase[i] >= SamplesNum) {
               whalePhase[i] -= SamplesNum; 
             }
@@ -607,18 +601,16 @@ void waveWrite() {
             } else {
               curVal[i] = linspace((float)waveDur[i] / 2, (float)waveAmp[i], 0, wavIncrmntr[i] - waveDur[i] / 2);
             }
-          } else if (waveType[i] == 5 && waveDur[i] > 0) {  // Gauss (Your beautifully fixed code)
+          } else if (waveType[i] == 5 && waveDur[i] > 0) {  // Gauss
+            
             int indexA = (int)gaussPhase[i];
             int indexB = indexA + 1;
-
             if (indexB >= SamplesNum) {
               indexB = 0; 
             }
-
             float fraction = gaussPhase[i] - indexA;                            
             float fineInterp = (float)gauss[indexA] + fraction * ((float)gauss[indexB] - (float)gauss[indexA]);
             curVal[i] = (int)round((fineInterp / 4095.0) * (float)waveAmp[i]);
-
             gaussPhase[i] += gaussStep[i];
 
             if (gaussPhase[i] >= SamplesNum) {
@@ -762,7 +754,7 @@ void parseData() {
       uint calculatedIPI  = (uint)round((waveParams[4] / 1000.0) * Fs);
       uint calculatedBase = (uint)round((waveParams[6] / 1000.0) * Fs);
       uint calculatedRamp = (uint)ceil((float)waveParams[3] / calculatedDur);
-      uint calculatedWhale = (float)(SamplesNum-1) / (float)calculatedDur;
+      float calculatedWhale = (float)(SamplesNum-1) / (float)calculatedDur;
       float calculatedGauss = (float)(SamplesNum-1) / (float)calculatedDur;
 
       // ========================================================

@@ -29,10 +29,10 @@ config.n_blocks = 4; % if you want to break the trial into sub blocks that each 
 % % Moore, 2019: whale, 6 ms rise, 20 ms fall, 20 Hz, 10 reps, 500 ms --
 % % actually 5 ms rise here *--
 config.piezo_chan = '0';
-config.pulse_type = '1'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid, 5 = gaussian
-config.pulse_len = '2'; % ms
+config.pulse_type = '0'; % 0 = whale, 1 = square, 2 = rampup, 3 = rampdown, 4 = pyramid, 5 = gaussian
+config.pulse_len = '50'; % ms
 config.pulse_intrvl = '0'; % ms
-config.pulse_reps = '1';
+config.pulse_reps = '4';
 
 config.iti_len = [4 8];
 config.prcnt_go_p_alone = 0.8; ... 0.9; % percentage of piezo alone trials that are go trials
