@@ -1,0 +1,50 @@
+function[labels] = cluster_beta(w,Fs)
+
+% Linkage input: Input data, specified as a numeric matrix with two or more 
+% rows. The rows represent observations, and the columns represent 
+% categories or dimensions. (observations x variables)
+
+w = zscore(w,0,2);
+
+L = linkage(w,'complete');
+
+figure
+dendrogram(L)
+
+eva = evalclusters(w,'linkage','silhouette','KList',1:14);
+nclust = eva.OptimalK;
+nclust = 3;
+
+labels = cluster(L,MaxClust=nclust);
+
+grp_waves = nan(numel(unique(labels)),size(w,2));
+grp_sds = nan(numel(unique(labels)),size(w,2));
+
+grps = unique(labels);
+for i = 1:numel(grps)
+    grp_waves(i,:) = mean(w(labels==grps(i),:),1);
+    grp_sds(i,:) = std(w(labels==grps(i),:),0,1);
+end
+
+figure,subplot(2,2,1)
+plot(grp_waves'+linspace(0,size(grp_waves,1)*2,size(grp_waves,1)))
+
+[spec,ff]=pwelch(grp_waves',size(grp_waves,2),round(size(grp_waves,2).*0.9),[0:90],Fs,'psd');
+subplot(2,2,2)
+plot(ff,spec), xlim([0 90])
+xlim([ff(1) ff(end)])
+grid on
+legend('Location','SouthOutside') 
+
+colororder(spring(nclust))
+
+subplot(2,2,3)
+[n,gn]=groupcounts(labels);
+bar(gn,n)
+
+subplot(2,2,4)
+bar(1:numel(grps),median(grp_sds,2))
+
+
+
+

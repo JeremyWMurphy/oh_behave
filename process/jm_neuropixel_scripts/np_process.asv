@@ -1,0 +1,142 @@
+
+pth = '/Users/jeremy/Desktop/gpr26_161_ephys/20260914/';
+run = 3;
+
+%% get data
+
+sesh = read_in_np2_jm(pth,run);
+
+%% get stimulus times
+
+%sesh.piezo_chan = 4; % 158
+sesh.piezo_chan = 4; % 161
+sesh.iti_min = 7;
+
+t_to_peak = 0.001*sesh.Fs;
+
+sesh = find_piezo_onsets_np(sesh,sesh.piezo_chan,sesh.iti_min,'sharp',t_to_peak);
+
+%% epoch data
+
+sesh.ep_win = [-0.1 0.5];
+sesh.decimate_by = 30;
+
+sesh = epoch_data(sesh,sesh.ep_win,sesh.decimate_by);
+
+%%
+
+lfp = sesh.lfp_eps;
+
+trl_rms_lfp = rms(squeeze(mean(lfp,2,'omitnan')))';
+bts_lfp = isoutlier(trl_rms_lfp);
+lfp(:,:,bts_lfp) = NaN;
+
+spk = sesh.spk_eps;
+
+trl_rms_spk = rms(squeeze(mean(spk(:,:,:),2)))';
+bts_mua = isoutlier(trl_rms_spk);
+spk(:,:,bts_mua) = NaN;
+
+%%
+lfp_eps_bs = lfp-mean(lfp(sesh.t<0,:,:),1,'omitnan');
+lfp_mu = mean(lfp_eps_bs,3,'omitnan');
+t = sesh.t;
+
+%% show lfp
+figure
+imagesc(t,1:size(lfp_mu,2),lfp_mu')
+xlim([-0.1 0.5])
+axis xy
+colormap turbo
+xlabel('Time (Sec)')
+ylabel('Channels organized by ascending depth')
+title('Mean LFP')
+
+%% plot mua
+
+% estimate noise floor so division by near zero value doesn't cause
+% problems when I normalize psths
+fuzzfactor = 0.01 * median(squeeze(std(spk(sesh.t<0,:,:),0,1,'omitnan')));
+spk_bs = squeeze(mean(spk(sesh.t<0,:,:),1))+fuzzfactor;
+spk_bs = reshape(spk_bs,1,size(spk_bs,1),size(spk_bs,2));
+spk_eps_bs = (spk-spk_bs)./spk_bs;
+spk_mu = mean(spk_eps_bs,3,'omitnan');
+figure
+imagesc(t,1:size(spk_mu,2),spk_mu')
+axis xy
+xlim([-0.1 0.5])
+colormap turbo
+xlabel('Time (Sec)')
+ylabel('Channels organized by ascending depth')
+title('Mean MUA')
+
+%% traditional csd with smoothing
+
+chan_spacing = 15e-6; % channel spacing in meters
+
+% Average the columns together
+lfp_1d = (lfp_mu(:,1:2:end)+lfp_mu(:,2:2:end))/2;
+orig_indices = [1:2:size(lfp_mu,2);2:2:size(lfp_mu,2)]';
+
+[csd] = csd_simple_jm(lfp_1d,15e-6);
+
+gauss_spatial_length = 25; % width of gaussian for smoothing 
+
+csd_smooth = smoothdata(csd,2,'gauss',gauss_spatial_length);
+%csd_smooth = imgaussfilt(csd,[5 5]);
+
+figure
+imagesc(t,1:size(csd_smooth,2),csd_smooth')
+axis xy
+xlim([-0.1 0.3])
+clim([-5e8 5e8])
+colormap jet
+
+xlabel('Time (Sec)')
+ylabel('Channels organized by ascending depth')
+title('Mean Traditional CSD with smoothing')
+
+%%
+
+% find big early sink
+win_oi = t>=0.0025 & t <=0.015;
+clip = csd_smooth(win_oi,:);
+% Locate the the strongest sink
+[~,ix] = min(clip(:));
+[tix,sink_loc] = ind2sub(size(clip), ix);
+
+t_win = t(win_oi);
+sink_t = t_win(tix);
+
+sink_loc = 8; % or manually set it because the above method doesn't always work
+
+csd_orig_indices = orig_indices(2:end-1,:);
+sesh.l4_elecs = csd_orig_indices(sink_loc,:);
+
+
+%%
+dz = 15e-6;
+R = 500e-6;
+sigma = 0.3;
+
+[csd, z_coords] = compute_icsd_delta_np2(lfp_1d', dz, R, sigma,1);
+
+figure
+%imagesc(t,z_coords.*1e6,csd)
+imagesc(t,1:size(csd,1),csd)
+axis xy
+xlim([-0.1 0.3])
+colormap jet
+xlabel('Time (Sec)')
+ylabel('Channels organized by ascending depth')
+title('delta icsd')
+
+%%
+
+sesh = rmfield(sesh,'np_data_map');
+sesh = rmfield(sesh,'ni_data_map');
+
+save([pth 'run_' num2str(run) '_data_processed.mat'],'sesh')
+
+
+
