@@ -10,9 +10,9 @@ fs = 2e3;
 switch do_subj
 
     case 1
-        
+
         id = '162';
-        pth = [top_pth 'gpr26_162/'];      
+        pth = [top_pth 'gpr26_162/'];
         strt = '2026-04-08';
         fin = '2026-04-18'; ...datetime('today');
 
@@ -21,7 +21,19 @@ switch do_subj
         pth = [top_pth 'gpr26_158/'];
         strt = '2026-05-08';
         fin = '2026-05-20'; ...datetime('today');
-   
+
+    case 3
+        id = '175';
+        pth = [top_pth 'gpr26_175/'];
+        strt = '2026-10-01';
+        fin = datetime('today');
+
+    case 4
+        id = '176';
+        pth = [top_pth 'gpr26_176/'];
+        strt = '2026-10-01';
+        fin = datetime('today');
+
 end
 
 %
@@ -32,11 +44,11 @@ run_days = [];
 read_in_data = 0;
 only_compute_new = true;
 for i = unique(exp_day)'
-    rns = runs(exp_day==i,:); 
+    rns = runs(exp_day==i,:);
     dts = dates(exp_day==i);
     run_day = dts(1);
     run_days = [run_days; run_day];
-    fprintf(['\nDoing ' char(run_day) ', Using files:\n'])  
+    fprintf(['\nDoing ' char(run_day) ', Using files:\n'])
     for j = 1:size(rns,1)
         fprintf([rns(j,:) ', '])
     end
@@ -59,7 +71,7 @@ end
 
 compile_days = unique(exp_day)';
 get_teensy_behavior_compile(pth,compile_days,run_days,id)
-    
+
 
 
 
